@@ -33,6 +33,8 @@ class MoviesController < ApplicationController
       flash.keep
       redirect_to :sort => sort, :ratings => @selected_ratings and return
     end
+    @noDirector = session[:noDirector]
+    session[:noDirector] = nil
     @movies = Movie.find_all_by_rating(@selected_ratings.keys, ordering)
   end
 
@@ -62,6 +64,18 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+
+  def similar
+    @movie = Movie.find(params[:id])
+    if @movie
+        if @movie.director != nil and @movie.director != ""
+	  @movies = Movie.find_all_by_director(@movie.director)
+	else
+	  session[:noDirector] = @movie.title
+	  redirect_to movies_path and return
+   	end
+    end	
   end
 
 end
